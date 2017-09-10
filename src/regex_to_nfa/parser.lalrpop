@@ -1,0 +1,26 @@
+use regex_to_nfa::parser_utils::*;
+use std::str::FromStr;
+use regex::Regex;
+
+grammar;
+
+pub Regex: Box<Ast> = {
+    <ConsRegex> "|" <Regex> => Box::new(Ast::Or(<>)),
+    ConsRegex
+};
+
+ConsRegex: Box<Ast> = {
+    <SimpleRegex> <ConsRegex> => Box::new(Ast::Cons(<>)),
+    SimpleRegex
+};
+
+SimpleRegex: Box<Ast> = {
+    <SimpleRegex> "*" => Box::new(Ast::Star(<>)),
+    "(" <Regex> ")",
+    r"c[0-9]*" => {
+        lazy_static! {
+            static ref RE: Regex = Regex::new(r"c([0-9]*)").unwrap();
+        }
+        Box::new(Ast::Terminal(FromStr::from_str(RE.captures(<>).unwrap().get(1).unwrap().as_str()).unwrap()))
+    }
+};

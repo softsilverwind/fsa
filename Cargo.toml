@@ -1,0 +1,13 @@
+[package]
+name = "fsa"
+version = "0.1.0"
+authors = ["Nick Vathis <nvathis@gmail.com>"]
+build = "build_lalrpop.rs"
+
+[build-dependencies]
+lalrpop = "*"
+
+[dependencies]
+lalrpop-util = "*"
+regex = "*"
+lazy_static = "*"
