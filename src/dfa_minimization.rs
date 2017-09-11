@@ -12,7 +12,6 @@ pub fn find_same(dfa: &DFANext, finals: &HashSet<StateId>) -> Vec<Vec<StateId>>
     for i in 0..statenum {
         for j in (i+1)..statenum {
             if finals.contains(&i) != finals.contains(&j) {
-                //println!("{} and {} are different because one is final, the other is not!", i, j);
                 different.insert((i, j));
                 different.insert((j, i));
             }
@@ -34,7 +33,6 @@ pub fn find_same(dfa: &DFANext, finals: &HashSet<StateId>) -> Vec<Vec<StateId>>
                 if symbols1.symmetric_difference(&symbols2).next() != None {
                     different.insert((i, j));
                     different.insert((j, i));
-                    //println!("{} and {} are different because, for some symbols, someone leads nowhere!", i, j);
                     fixpoint = false;
                     continue;
                 }
@@ -46,7 +44,6 @@ pub fn find_same(dfa: &DFANext, finals: &HashSet<StateId>) -> Vec<Vec<StateId>>
                     if different.contains(&(next1, next2)) {
                         different.insert((i, j));
                         different.insert((j, i));
-                        //println!("{} and {} are different because, for {}, they lead to {} and {} respectively!", i, j, symbol, next1, next2);
                         fixpoint = false;
                         continue 'jloop;
                     }
@@ -54,8 +51,6 @@ pub fn find_same(dfa: &DFANext, finals: &HashSet<StateId>) -> Vec<Vec<StateId>>
             }
         }
     }
-
-    //println!("{:?}", different);
 
     let mut ret = vec![Vec::new(); statenum as usize];
     for i in 0..statenum {

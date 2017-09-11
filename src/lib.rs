@@ -20,17 +20,17 @@ type DFANextElem = HashMap<SymbolId, StateId>;
 type NFANext = Vec<NFANextElem>;
 type DFANext = Vec<DFANextElem>;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct NFA
 {
-    next: NFANext
+    pub next: NFANext
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct DFA
 {
-    next: DFANext,
-    finals: HashSet<StateId>
+    pub next: DFANext,
+    pub finals: HashSet<StateId>
 }
 
 impl NFA
@@ -38,11 +38,6 @@ impl NFA
     pub fn from_regex(regex: &str) -> Result<Self, String>
     {
         Ok(Self { next: regex_to_nfa(regex)? })
-    }
-
-    pub fn next(&self, symbol: SymbolId, state: StateId) -> &Vec<StateId>
-    {
-        &self.next[state as usize][&symbol]
     }
 
     pub fn print_graphviz(&self)
@@ -75,16 +70,6 @@ impl DFA
         Self { next, finals }
     }
 
-    pub fn next(&self, symbol: SymbolId, state: StateId) -> StateId
-    {
-        self.next[state as usize][&symbol]
-    }
-
-    pub fn is_final(&self, state: StateId) -> bool
-    {
-        self.finals.contains(&state)
-    }
-    
     pub fn minimize(&mut self)
     {
         minimize_dfa(&mut self.next, &mut self.finals);
