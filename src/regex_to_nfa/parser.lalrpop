@@ -16,6 +16,12 @@ ConsRegex: Box<Ast> = {
 
 SimpleRegex: Box<Ast> = {
     <SimpleRegex> "*" => Box::new(Ast::Star(<>)),
+    <SimpleRegex> "?" => Box::new(Ast::Optional(<>)),
+    <reg:SimpleRegex> "{" <s:r"[0-9]*"> "," <e:r"[0-9]*"> "}" => {
+        let start = FromStr::from_str(s).unwrap();
+        let end = FromStr::from_str(e).unwrap();
+        Box::new(Ast::Range(reg, start, end))
+    },
     "(" <Regex> ")",
     r"c[0-9]*" => {
         lazy_static! {
