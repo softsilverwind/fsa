@@ -3,9 +3,9 @@ extern crate regex;
 
 use std::collections::{HashMap, HashSet};
 
-mod regex_to_nfa;
-mod nfa_to_dfa;
-mod dfa_minimization;
+pub mod regex_to_nfa;
+pub mod nfa_to_dfa;
+pub mod dfa_minimization;
 
 use self::regex_to_nfa::regex_to_nfa;
 use self::nfa_to_dfa::nfa_to_dfa;

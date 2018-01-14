@@ -1,7 +1,7 @@
 use super::{StateId, NFANext, NFANextElem};
 
-mod parser;
-mod parser_utils;
+pub mod parser;
+pub mod parser_utils;
 
 use self::parser_utils::{Ast, new_node, new_dummy_node, add_e_transfer, backpatch};
 
