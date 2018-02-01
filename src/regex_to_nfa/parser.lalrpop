@@ -1,6 +1,7 @@
 use regex_to_nfa::parser_utils::*;
 use std::str::FromStr;
 use regex::Regex;
+use SymbolId;
 
 grammar;
 
@@ -23,10 +24,13 @@ SimpleRegex: Box<Ast> = {
         Box::new(Ast::Range(reg, start, end))
     },
     "(" <Regex> ")",
-    r"c[0-9]*" => {
+    r"c[0-9]+" => {
         lazy_static! {
             static ref RE: Regex = Regex::new(r"c([0-9]*)").unwrap();
         }
         Box::new(Ast::Terminal(FromStr::from_str(RE.captures(<>).unwrap().get(1).unwrap().as_str()).unwrap()))
+    },
+    r"[a-z]" => {
+        Box::new(Ast::Terminal(<>.as_bytes()[0] as SymbolId - 97))
     }
 };
