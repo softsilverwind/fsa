@@ -31,6 +31,6 @@ SimpleRegex: Box<Ast> = {
         Box::new(Ast::Terminal(FromStr::from_str(RE.captures(<>).unwrap().get(1).unwrap().as_str()).unwrap()))
     },
     r"[a-z]" => {
-        Box::new(Ast::Terminal(<>.as_bytes()[0] as SymbolId - 97))
+        Box::new(Ast::Terminal(<>.as_bytes()[0] as SymbolId - 97 + 1))
     }
 };

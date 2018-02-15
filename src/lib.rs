@@ -98,4 +98,18 @@ impl DFA
         }
         println!("}}");
     }
+
+    pub fn matches(&self, string: &[SymbolId]) -> bool
+    {
+        let mut state = 0 as StateId;
+
+        for symbol in string {
+            match self.next[state as usize].get(&symbol) {
+                Some(&next_state) => state = next_state,
+                None => return false
+            }
+        }
+
+        self.finals.contains(&state)
+    }
 }
