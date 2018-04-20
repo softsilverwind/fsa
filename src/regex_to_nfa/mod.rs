@@ -52,7 +52,7 @@ fn regex_to_nfa_inner(ast: &Ast, acc: &mut NFANext) -> (StateId, StateId)
 
 pub fn regex_to_nfa(regex: &str) -> Result<NFANext, String>
 {
-    let ast = match parser::parse_Regex(regex) {
+    let ast = match parser::RegexParser::new().parse(regex) {
         Ok(x) => x,
         Err(x) => return Err(format!("{:?}", x))
     };

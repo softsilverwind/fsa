@@ -5,9 +5,9 @@ authors = ["Nick Vathis <nvathis@gmail.com>"]
 build = "build_lalrpop.rs"
 
 [build-dependencies]
-lalrpop = "*"
+lalrpop = "~0.15"
 
 [dependencies]
-lalrpop-util = "*"
-regex = "*"
-lazy_static = "*"
+lalrpop-util = "~0.15"
+regex = "~0.2"
+lazy_static = "~1.0.0"
