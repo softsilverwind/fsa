@@ -1,3 +1,5 @@
+#![allow(clippy::implicit_hasher)]
+
 #[macro_use] extern crate lazy_static;
 extern crate regex;
 
@@ -19,7 +21,9 @@ type NFANextElem = HashMap<SymbolId, Vec<StateId>>;
 type DFANextElem = HashMap<SymbolId, StateId>;
 
 type NFANext = Vec<NFANextElem>;
+type NFANextView = [NFANextElem];
 type DFANext = Vec<DFANextElem>;
+type DFANextView = [DFANextElem];
 
 #[derive(Clone, Debug)]
 pub struct NFA

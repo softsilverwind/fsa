@@ -1,4 +1,4 @@
-use super::super::{StateId, SymbolId, NFANext, NFANextElem};
+use crate::{StateId, SymbolId, NFANext, NFANextElem};
 
 #[derive(Debug)]
 pub enum Ast
@@ -11,7 +11,7 @@ pub enum Ast
     Range(Box<Ast>, i32, i32)
 }
 
-pub fn new_node (acc: &mut NFANext, symbol: SymbolId, next: Vec<StateId>) -> StateId
+pub fn new_node(acc: &mut NFANext, symbol: SymbolId, next: Vec<StateId>) -> StateId
 {
     let len = acc.len() as StateId;
     let mut hmap: NFANextElem = NFANextElem::new();

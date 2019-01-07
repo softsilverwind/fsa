@@ -1,7 +1,9 @@
-use regex_to_nfa::parser_utils::*;
 use std::str::FromStr;
+
 use regex::Regex;
-use SymbolId;
+use crate::SymbolId;
+
+use crate::regex_to_nfa::parser_utils::*;
 
 grammar;
 

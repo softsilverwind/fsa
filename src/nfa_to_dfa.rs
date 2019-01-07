@@ -1,8 +1,8 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use super::{StateId, NFANext, DFANext, NFANextElem, DFANextElem};
+use super::{StateId, NFANextView, DFANext, NFANextElem, DFANextElem};
 
-pub fn e_closure(nfa: &NFANext) -> Vec<Vec<StateId>>
+pub fn e_closure(nfa: &NFANextView) -> Vec<Vec<StateId>>
 {
     let mut ret: Vec<Vec<StateId>> = vec![Vec::new(); nfa.len()];
     let mut stack: Vec<StateId> = Vec::new();
@@ -30,7 +30,7 @@ pub fn e_closure(nfa: &NFANext) -> Vec<Vec<StateId>>
     ret
 }
 
-pub fn nfa_to_dfa(nfa: &NFANext) -> (DFANext,HashSet<StateId>)
+pub fn nfa_to_dfa(nfa: &NFANextView) -> (DFANext,HashSet<StateId>)
 {
     let mut queue: VecDeque<Vec<StateId>> = VecDeque::new();
     let mut translate: HashMap<Vec<StateId>, StateId> = HashMap::new();
@@ -59,7 +59,7 @@ pub fn nfa_to_dfa(nfa: &NFANext) -> (DFANext,HashSet<StateId>)
                     continue
                 }
 
-                let entry = next_states.entry(*symbol).or_insert(Vec::new());
+                let entry = next_states.entry(*symbol).or_insert_with(Vec::new);
                 entry.extend(next);
                 for n in next {
                     entry.extend(ecl[*n as usize].iter());

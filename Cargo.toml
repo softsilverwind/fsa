@@ -3,11 +3,12 @@ name = "fsa"
 version = "0.1.0"
 authors = ["Nick Vathis <nvathis@gmail.com>"]
 build = "build_lalrpop.rs"
-
-[build-dependencies]
-lalrpop = "~0.15"
+edition = "2018"
 
 [dependencies]
-lalrpop-util = "~0.15"
-regex = "~0.2"
-lazy_static = "~1.0.0"
+lalrpop-util = "0.16.2"
+regex = "1.1.0"
+lazy_static = "1.2.0"
+
+[build-dependencies]
+lalrpop = "0.16.2"

@@ -2,9 +2,9 @@ use std::cmp::min;
 use std::collections::{HashSet, HashMap};
 use std::iter::FromIterator;
 
-use super::{DFANext, DFANextElem, StateId, SymbolId};
+use super::{DFANext, DFANextView, DFANextElem, StateId, SymbolId};
 
-pub fn find_same(dfa: &DFANext, finals: &HashSet<StateId>) -> Vec<Vec<StateId>>
+pub fn find_same(dfa: &DFANextView, finals: &HashSet<StateId>) -> Vec<Vec<StateId>>
 {
     let statenum = dfa.len() as StateId;
     let mut different: HashSet<(StateId, StateId)> = HashSet::new();
@@ -27,8 +27,8 @@ pub fn find_same(dfa: &DFANext, finals: &HashSet<StateId>) -> Vec<Vec<StateId>>
                     continue;
                 }
 
-                let symbols1: HashSet<SymbolId> = HashSet::from_iter(dfa[i as usize].keys().map(|x| *x));
-                let symbols2: HashSet<SymbolId> = HashSet::from_iter(dfa[j as usize].keys().map(|x| *x));
+                let symbols1: HashSet<SymbolId> = HashSet::from_iter(dfa[i as usize].keys().cloned());
+                let symbols2: HashSet<SymbolId> = HashSet::from_iter(dfa[j as usize].keys().cloned());
 
                 if symbols1.symmetric_difference(&symbols2).next() != None {
                     different.insert((i, j));

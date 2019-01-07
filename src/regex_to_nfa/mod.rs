@@ -1,7 +1,9 @@
+use lalrpop_util::lalrpop_mod;
+
 use super::{StateId, NFANext, NFANextElem};
 
-pub mod parser;
-pub mod parser_utils;
+lalrpop_mod!(#[allow(clippy::all)] pub parser, "/src/regex_to_nfa/parser.rs");
+mod parser_utils;
 
 use self::parser_utils::{Ast, new_node, new_dummy_node, add_e_transfer, backpatch};
 
@@ -12,24 +14,24 @@ fn regex_to_nfa_inner(ast: &Ast, acc: &mut NFANext) -> (StateId, StateId)
         &Ast::Terminal(id) => {
             new_node(acc, id, vec![start + 2]);
         },
-        &Ast::Cons(ref a1, ref a2) => {
+        Ast::Cons(a1, a2) => {
             regex_to_nfa_inner(a1, acc);
             regex_to_nfa_inner(a2, acc);
         },
-        &Ast::Star(ref a) => {
+        Ast::Star(a) => {
             regex_to_nfa_inner(a, acc);
             let end = new_dummy_node(acc);
             add_e_transfer(acc, end, start); // might return
             add_e_transfer(acc, start, end); // might skip
         }
-        &Ast::Or(ref a1, ref a2) => {
+        Ast::Or(a1, a2) => {
             let (_, a1_end) = regex_to_nfa_inner(a1, acc);
             let (a2_start, _) = regex_to_nfa_inner(a2, acc);
             let end = new_dummy_node(acc);
             backpatch(acc, a1_end, a2_start, end); // a1 should continue after a2_end
             add_e_transfer(acc, start, a2_start);  // Make start skip to a2
         },
-        &Ast::Optional(ref a) => {
+        Ast::Optional(a) => {
             regex_to_nfa_inner(a, acc);
             let end = new_dummy_node(acc);
             add_e_transfer(acc, start, end); // might skip

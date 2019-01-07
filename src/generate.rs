@@ -1,7 +1,7 @@
 use std::collections::{HashSet, HashMap, VecDeque};
 use std::mem;
 
-use ::{DFA, StateId, SymbolId};
+use crate::{DFA, StateId, SymbolId};
 
 pub type StateString = (Vec<SymbolId>, Vec<StateId>);
 
@@ -54,7 +54,7 @@ pub fn dfs(instance: &mut DFSInstance, current: StateId)
                 let mut pair = (vec![], vec![newstate]);
                 pair.0.push(symb);
                 pair.1.push(current);
-                instance.cycles.entry(current).or_insert(vec![]).push(pair);
+                instance.cycles.entry(current).or_insert_with(Vec::new).push(pair);
             }
             continue
         }
@@ -70,7 +70,7 @@ pub fn dfs(instance: &mut DFSInstance, current: StateId)
         //println!("OK");
         //println!("Found {:?} for {}", cycles, current);
 
-        instance.cycles.entry(current).or_insert(vec![]).append(&mut cycles);
+        instance.cycles.entry(current).or_insert_with(Vec::new).append(&mut cycles);
         //println!("{:?}", instance.cycles);
     }
 
@@ -107,7 +107,7 @@ impl super::DFA
 
         for i in 0..self.next.len() as StateId {
             let mut c = find_paths(&self, i, i);
-            c.retain(|elem| elem.0.len() > 0);
+            c.retain(|elem| !elem.0.is_empty());
             cycles.insert(i, c);
         }
         eprintln!("Cycles: {:?}", cycles);
@@ -117,7 +117,7 @@ impl super::DFA
             if !f(&state_string.0) {
                 continue;
             }
-            
+
             for i in 0..state_string.1.len() {
                 for cycle in cycles[&state_string.1[i]].iter() {
                     let mut left_states = state_string.1.clone();
