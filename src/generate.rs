@@ -39,18 +39,13 @@ pub fn dfs(instance: &mut DFSInstance, current: StateId)
         }
     }
 
-    //println!("{}", current);
-
     for (&symb, &newstate) in instance.dfa.next[current as usize].iter() {
         if !instance.discovered.contains(&newstate) {
-            //println!("Visiting {} -> {}", current, newstate);
             dfs(instance, newstate);
         }
 
         if !instance.finished.contains(&newstate) { // Backward edge
-            //println!("{} -> {} is a backward edge", current, newstate);
             if newstate == instance.end {
-                //println!("But it goes to the end so we need some extra work");
                 let mut pair = (vec![], vec![newstate]);
                 pair.0.push(symb);
                 pair.1.push(current);
@@ -67,14 +62,8 @@ pub fn dfs(instance: &mut DFSInstance, current: StateId)
             cycles.push(pair);
         });
 
-        //println!("OK");
-        //println!("Found {:?} for {}", cycles, current);
-
         instance.cycles.entry(current).or_insert_with(Vec::new).append(&mut cycles);
-        //println!("{:?}", instance.cycles);
     }
-
-    //println!("Returning from {}", current);
 
     instance.finished.insert(current);
 }
@@ -84,7 +73,6 @@ pub fn find_paths(dfa: &DFA, start: StateId, end: StateId) -> Vec<StateString>
     let mut instance = DFSInstance::new(dfa, start, end);
     dfs(&mut instance, start);
 
-    //println!("{:?}", instance);
     instance.cycles.get_mut(&start).map(|cycles| {
         let mut ret = mem::replace(cycles, Vec::new());
         ret.iter_mut().for_each(|cycle| {
@@ -110,7 +98,6 @@ impl super::DFA
             c.retain(|elem| !elem.0.is_empty());
             cycles.insert(i, c);
         }
-        eprintln!("Cycles: {:?}", cycles);
 
         while let Some(state_string) = queue.pop_front() {
             visited.insert(state_string.clone());
