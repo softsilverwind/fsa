@@ -22,7 +22,7 @@ pub fn find_same(dfa: &dfa::NextElemsView, finals: &HashSet<State>) -> Vec<Vec<S
     while !fixpoint {
         fixpoint = true;
         for i in (0..statenum).map(|x| x.into()) {
-            'jloop: for j in ((usize::from(i) + 1)..statenum).map(|x| x.into()) {
+            for j in ((usize::from(i) + 1)..statenum).map(|x| x.into()) {
                 if different.contains(&(i, j)) {
                     continue;
                 }
@@ -45,7 +45,7 @@ pub fn find_same(dfa: &dfa::NextElemsView, finals: &HashSet<State>) -> Vec<Vec<S
                         different.insert((i, j));
                         different.insert((j, i));
                         fixpoint = false;
-                        continue 'jloop;
+                        break;
                     }
                 }
             }
@@ -57,6 +57,7 @@ pub fn find_same(dfa: &dfa::NextElemsView, finals: &HashSet<State>) -> Vec<Vec<S
         for j in ((usize::from(i) + 1)..statenum).map(|x| x.into()) {
             if !different.contains(&(i, j)) {
                 ret[usize::from(i)].push(j);
+                ret[usize::from(j)].push(i);
             }
         }
         ret[usize::from(i)].sort();

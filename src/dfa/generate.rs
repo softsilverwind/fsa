@@ -1,89 +1,58 @@
 use std::collections::{HashSet, HashMap, VecDeque};
-use std::mem;
 
 use crate::{DFA, State, Symbol};
 
 pub type StateString = (Vec<Symbol>, Vec<State>);
 
-#[derive(Debug)]
-pub struct DFSInstance<'a>
+fn dfs(
+    dfa: &DFA,
+    end: State,
+    visited: &mut HashSet<State>,
+    current: State,
+) -> Vec<StateString>
 {
-    pub dfa: &'a DFA,
-    pub start: State,
-    pub end: State,
-    pub discovered: HashSet<State>,
-    pub finished: HashSet<State>,
-    pub cycles: HashMap<State, Vec<StateString>>
-}
-
-impl<'a> DFSInstance<'a>
-{
-    pub fn new(dfa: &'a DFA, start: State, end: State) -> Self
-    {
-        DFSInstance {
-            dfa, start, end, discovered: HashSet::new(),
-            finished: HashSet::new(), cycles: HashMap::new()
+    if current == end {
+        if !visited.is_empty() {
+            return vec![(vec![], vec![current])];
         }
     }
-}
+    else {
+        visited.insert(current);
+    }
 
-pub fn dfs(instance: &mut DFSInstance, current: State)
-{
-    instance.discovered.insert(current);
+    let mut paths = Vec::new();
 
-    if current == instance.end {
-        instance.cycles.insert(current, vec![(vec![], vec![current])]);
+    for (&symb, &newstate) in dfa.next[usize::from(current)].iter() {
+        let paths_rec = if !visited.contains(&newstate) {
+            dfs(dfa, end, visited, newstate)
+        }
+        else {
+            Vec::new()
+        };
 
-        if current != instance.start {
-            return;
+        for mut path in paths_rec {
+            path.0.push(symb);
+            path.1.push(current);
+            paths.push(path);
         }
     }
 
-    for (&symb, &newstate) in instance.dfa.next[usize::from(current)].iter() {
-        if !instance.discovered.contains(&newstate) {
-            dfs(instance, newstate);
-        }
+    visited.remove(&current);
 
-        if !instance.finished.contains(&newstate) { // Backward edge
-            if newstate == instance.end {
-                let mut pair = (vec![], vec![newstate]);
-                pair.0.push(symb);
-                pair.1.push(current);
-                instance.cycles.entry(current).or_insert_with(Vec::new).push(pair);
-            }
-            continue
-        }
+    paths
+}
 
-        let mut cycles: Vec<StateString> = vec![];
-        instance.cycles.get(&newstate).unwrap_or(&vec![]).iter().for_each(|cycle| {
-            let mut pair = cycle.clone();
-            pair.0.push(symb);
-            pair.1.push(current);
-            cycles.push(pair);
-        });
+fn find_paths(dfa: &DFA, start: State, end: State) -> Vec<StateString>
+{
+    let mut paths = dfs(&dfa, end, &mut HashSet::new(), start);
 
-        instance.cycles.entry(current).or_insert_with(Vec::new).append(&mut cycles);
+    for path in paths.iter_mut() {
+        path.0.reverse();
+        path.1.reverse();
     }
 
-
-    instance.finished.insert(current);
+    paths
 }
-
-pub fn find_paths(dfa: &DFA, start: State, end: State) -> Vec<StateString>
-{
-    let mut instance = DFSInstance::new(dfa, start, end);
-    dfs(&mut instance, start);
-
-    instance.cycles.get_mut(&start).map(|cycles| {
-        let mut ret = mem::replace(cycles, Vec::new());
-        ret.iter_mut().for_each(|cycle| {
-            cycle.0.reverse();
-            cycle.1.reverse();
-        });
-        ret
-    }).unwrap_or_default()
-}
-
 
 impl super::DFA
 {
