@@ -1,9 +1,9 @@
 use std::str::FromStr;
 
 use regex::Regex;
-use crate::SymbolId;
+use lazy_static::lazy_static;
 
-use crate::regex_to_nfa::parser_utils::*;
+use super::parser_utils::*;
 
 grammar;
 
@@ -26,13 +26,13 @@ SimpleRegex: Box<Ast> = {
         Box::new(Ast::Range(reg, start, end))
     },
     "(" <Regex> ")",
-    r"c[0-9]+" => {
+    r"\$[0-9]+" => {
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"c([0-9]*)").unwrap();
+            static ref RE: Regex = Regex::new(r"\$([0-9]*)").unwrap();
         }
-        Box::new(Ast::Terminal(FromStr::from_str(RE.captures(<>).unwrap().get(1).unwrap().as_str()).unwrap()))
+        Box::new(Ast::Terminal(RE.captures(<>).unwrap().get(1).unwrap().as_str().parse::<usize>().unwrap().into()))
     },
     r"[a-z]" => {
-        Box::new(Ast::Terminal(<>.as_bytes()[0] as SymbolId - 97 + 1))
+        Box::new(Ast::Terminal(((<>.as_bytes()[0] - 97 + 1) as usize).into()))
     }
 };

@@ -1,24 +1,24 @@
 use std::collections::{HashSet, HashMap, VecDeque};
 use std::mem;
 
-use crate::{DFA, StateId, SymbolId};
+use crate::{DFA, State, Symbol};
 
-pub type StateString = (Vec<SymbolId>, Vec<StateId>);
+pub type StateString = (Vec<Symbol>, Vec<State>);
 
 #[derive(Debug)]
 pub struct DFSInstance<'a>
 {
     pub dfa: &'a DFA,
-    pub start: StateId,
-    pub end: StateId,
-    pub discovered: HashSet<StateId>,
-    pub finished: HashSet<StateId>,
-    pub cycles: HashMap<SymbolId, Vec<StateString>>
+    pub start: State,
+    pub end: State,
+    pub discovered: HashSet<State>,
+    pub finished: HashSet<State>,
+    pub cycles: HashMap<State, Vec<StateString>>
 }
 
 impl<'a> DFSInstance<'a>
 {
-    pub fn new(dfa: &'a DFA, start: StateId, end: StateId) -> Self
+    pub fn new(dfa: &'a DFA, start: State, end: State) -> Self
     {
         DFSInstance {
             dfa, start, end, discovered: HashSet::new(),
@@ -27,7 +27,7 @@ impl<'a> DFSInstance<'a>
     }
 }
 
-pub fn dfs(instance: &mut DFSInstance, current: StateId)
+pub fn dfs(instance: &mut DFSInstance, current: State)
 {
     instance.discovered.insert(current);
 
@@ -39,7 +39,7 @@ pub fn dfs(instance: &mut DFSInstance, current: StateId)
         }
     }
 
-    for (&symb, &newstate) in instance.dfa.next[current as usize].iter() {
+    for (&symb, &newstate) in instance.dfa.next[usize::from(current)].iter() {
         if !instance.discovered.contains(&newstate) {
             dfs(instance, newstate);
         }
@@ -65,10 +65,11 @@ pub fn dfs(instance: &mut DFSInstance, current: StateId)
         instance.cycles.entry(current).or_insert_with(Vec::new).append(&mut cycles);
     }
 
+
     instance.finished.insert(current);
 }
 
-pub fn find_paths(dfa: &DFA, start: StateId, end: StateId) -> Vec<StateString>
+pub fn find_paths(dfa: &DFA, start: State, end: State) -> Vec<StateString>
 {
     let mut instance = DFSInstance::new(dfa, start, end);
     dfs(&mut instance, start);
@@ -87,16 +88,17 @@ pub fn find_paths(dfa: &DFA, start: StateId, end: StateId) -> Vec<StateString>
 impl super::DFA
 {
     pub fn generate<F>(&self, mut f: F)
-        where F: FnMut(&[SymbolId]) -> bool
+        where F: FnMut(&[Symbol]) -> bool
     {
-        let mut queue: VecDeque<StateString> = self.finals.iter().flat_map(|i| find_paths(&self, 0, *i)).collect();
-        let mut cycles: HashMap<StateId, Vec<StateString>> = HashMap::new();
+        let mut queue: VecDeque<StateString> = self.finals.iter().flat_map(|i| find_paths(&self, 0.into(), *i)).collect();
+        let mut cycles: HashMap<State, Vec<StateString>> = HashMap::new();
         let mut visited: HashSet<StateString> = HashSet::new();
 
-        for i in 0..self.next.len() as StateId {
-            let mut c = find_paths(&self, i, i);
+        for i in 0..self.next.len() {
+            let state = State::from(i);
+            let mut c = find_paths(&self, state, state);
             c.retain(|elem| !elem.0.is_empty());
-            cycles.insert(i, c);
+            cycles.insert(state, c);
         }
 
         while let Some(state_string) = queue.pop_front() {

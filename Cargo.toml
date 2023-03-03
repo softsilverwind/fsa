@@ -3,12 +3,15 @@ name = "fsa"
 version = "0.1.0"
 authors = ["Nick Vathis <nvathis@gmail.com>"]
 build = "build_lalrpop.rs"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-lalrpop-util = "0.16.2"
-regex = "1.1.0"
-lazy_static = "1.2.0"
+lalrpop-util = { version = "0.19.7", features = ["lexer"] }
+regex = "1.5.5"
+lazy_static = "1.4.0"
+nicole = { git = "ssh://git@github.com/softsilverwind/nicole.git", tag = "v0.2.1" }
+nicole_derive = { git = "ssh://git@github.com/softsilverwind/nicole_derive.git" }
+indoc = "1.0.4"
 
 [build-dependencies]
-lalrpop = "0.16.2"
+lalrpop = "0.19.7"
