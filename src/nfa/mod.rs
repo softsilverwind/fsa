@@ -1,15 +1,16 @@
 use std::{
     str::FromStr,
-    error::Error
+    error::Error,
+    collections::HashMap
 };
 
 use crate::{State, Symbol};
 
-use nicole::{typedvec::TypedVec, IdMap};
+use nicole::typedvec::TypedVec;
 
 mod regex_parser;
 
-pub type NextElem = IdMap<Symbol, Vec<State>>;
+pub type NextElem = HashMap<Symbol, Vec<State>>;
 pub type NextElems = TypedVec<State, NextElem>;
 
 #[derive(Clone, Debug)]
@@ -49,8 +50,7 @@ impl NFA
             );
         }
 
-        for (state_id, dict) in self.next.iter().enumerate() {
-            let state: State = state_id.into();
+        for (state, dict) in self.next.iter() {
             for (symbol, next_states) in dict.iter() {
                 for next_state in next_states {
                     println!(

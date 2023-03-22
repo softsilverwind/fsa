@@ -1,14 +1,14 @@
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 
 use crate::{Symbol, State, nfa::NFA};
 
-use nicole::{typedvec::TypedVec, IdMap};
+use nicole::typedvec::TypedVec;
 
 mod convert;
 mod generate;
 mod minimize;
 
-pub type NextElem = IdMap<Symbol, State>;
+pub type NextElem = HashMap<Symbol, State>;
 pub type NextElems = TypedVec<State, NextElem>;
 
 #[derive(Clone, Debug)]
@@ -54,8 +54,7 @@ impl DFA
             );
         }
 
-        for (state_id, dict) in self.next.iter().enumerate() {
-            let state: State = state_id.into();
+        for (state, dict) in self.next.iter() {
             for (symbol, next_state) in dict.iter() {
                 println!(
                     "    {state} -> {next_state} [ label={symbol} ];",

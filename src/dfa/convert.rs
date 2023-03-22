@@ -61,16 +61,14 @@ pub fn nfa_to_dfa(nfa: &nfa::NextElems) -> (dfa::NextElems, HashSet<State>)
                     continue
                 }
 
-                if !next_states.contains_key(&symbol) {
-                    next_states.insert(symbol, Vec::new())
-                }
-                next_states[&symbol].extend(next);
+                let entry = next_states.entry(*symbol).or_insert(Vec::new());
+                entry.extend(next);
                 for n in next {
-                    next_states[&symbol].extend(ecl[usize::from(*n)].iter());
+                    entry.extend(ecl[usize::from(*n)].iter());
                 }
 
-                next_states[&symbol].sort();
-                next_states[&symbol].dedup();
+                entry.sort();
+                entry.dedup();
             }
         }
 

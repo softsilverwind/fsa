@@ -27,8 +27,8 @@ pub fn find_same(dfa: &dfa::NextElems, finals: &HashSet<State>) -> Vec<Vec<State
                     continue;
                 }
 
-                let symbols1: HashSet<Symbol> = HashSet::from_iter(dfa[i].keys());
-                let symbols2: HashSet<Symbol> = HashSet::from_iter(dfa[j].keys());
+                let symbols1: HashSet<Symbol> = HashSet::from_iter(dfa[i].keys().copied());
+                let symbols2: HashSet<Symbol> = HashSet::from_iter(dfa[j].keys().copied());
 
                 if symbols1.symmetric_difference(&symbols2).next() != None {
                     different.insert((i, j));
@@ -74,8 +74,7 @@ pub fn minimize_dfa(dfa: &mut dfa::NextElems, finals: &mut HashSet<State>)
     let mut translate: HashMap<State, State> = HashMap::new();
     let mut curr_state_id = 0;
 
-    for (state_id, state) in dfa.iter().enumerate() {
-        let state_id = state_id.into();
+    for (state_id, state) in dfa.iter() {
         if *same[usize::from(state_id)].get(0).unwrap_or_else(|| &state_id) < state_id {
             continue;
         }
@@ -89,12 +88,12 @@ pub fn minimize_dfa(dfa: &mut dfa::NextElems, finals: &mut HashSet<State>)
                 Some(x) => min(x, next),
                 None => next
             };
-            new_state.insert(symbol, *untranslated_actual_next);
+            new_state.insert(*symbol, *untranslated_actual_next);
         }
         new_dfa.push(new_state);
     }
 
-    for state in new_dfa.iter_mut() {
+    for (_, state) in new_dfa.iter_mut() {
         for (_, next) in state.iter_mut() {
             *next = *translate.get(next).unwrap_or_else(|| next);
         }

@@ -31,7 +31,7 @@ fn dfs(
         };
 
         for mut path in paths_rec {
-            path.0.push(symb);
+            path.0.push(*symb);
             path.1.push(current);
             paths.push(path);
         }
