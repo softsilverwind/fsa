@@ -31,12 +31,12 @@ pub fn new_dummy_node(acc: &mut nfa::NextElems) -> State
 
 pub fn add_e_transfer(acc: &mut nfa::NextElems, from: State, to: State)
 {
-    acc[usize::from(from)].get_mut(&Symbol::null()).unwrap().push(to);
+    acc[from].get_mut(&Symbol::null()).unwrap().push(to);
 }
 
 pub fn backpatch(acc: &mut nfa::NextElems, state: State, from: State, to: State)
 {
-    for (_, val) in acc[usize::from(state)].iter_mut() {
+    for (_, val) in acc[state].iter_mut() {
         for x in val.iter_mut() {
             if *x == from {
                 *x = to;

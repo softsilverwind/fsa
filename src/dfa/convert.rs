@@ -4,7 +4,7 @@ use nicole::IdLike;
 
 use crate::{State, nfa, dfa, Symbol};
 
-pub fn e_closure(nfa: &nfa::NextElemsView) -> Vec<Vec<State>>
+pub fn e_closure(nfa: &nfa::NextElems) -> Vec<Vec<State>>
 {
     let mut ret: Vec<Vec<State>> = vec![Vec::new(); nfa.len()];
     let mut stack: Vec<State> = Vec::new();
@@ -16,7 +16,7 @@ pub fn e_closure(nfa: &nfa::NextElemsView) -> Vec<Vec<State>>
         while let Some(x) = stack.pop() {
             if !visited[usize::from(x)] {
                 ret[initial].push(x.into());
-                if let Some(neighbors) = nfa[usize::from(x)].get(&Symbol::null()) {
+                if let Some(neighbors) = nfa[x].get(&Symbol::null()) {
                     stack.extend(neighbors);
                 }
             }
@@ -32,7 +32,7 @@ pub fn e_closure(nfa: &nfa::NextElemsView) -> Vec<Vec<State>>
     ret
 }
 
-pub fn nfa_to_dfa(nfa: &nfa::NextElemsView) -> (dfa::NextElems, HashSet<State>)
+pub fn nfa_to_dfa(nfa: &nfa::NextElems) -> (dfa::NextElems, HashSet<State>)
 {
     let mut queue: VecDeque<Vec<State>> = VecDeque::new();
     let mut translate: HashMap<Vec<State>, State> = HashMap::new();
@@ -56,23 +56,25 @@ pub fn nfa_to_dfa(nfa: &nfa::NextElemsView) -> (dfa::NextElems, HashSet<State>)
 
         let mut next_states = nfa::NextElem::new();
         for elem in vec {
-            for (symbol, next) in nfa[usize::from(elem)].iter() {
+            for (symbol, next) in nfa[elem].iter() {
                 if symbol.is_null() {
                     continue
                 }
 
-                let entry = next_states.entry(*symbol).or_insert_with(Vec::new);
-                entry.extend(next);
+                if !next_states.contains_key(&symbol) {
+                    next_states.insert(symbol, Vec::new())
+                }
+                next_states[&symbol].extend(next);
                 for n in next {
-                    entry.extend(ecl[usize::from(*n)].iter());
+                    next_states[&symbol].extend(ecl[usize::from(*n)].iter());
                 }
 
-                entry.sort();
-                entry.dedup();
+                next_states[&symbol].sort();
+                next_states[&symbol].dedup();
             }
         }
 
-        for (symbol, next) in next_states {
+        for (symbol, next) in next_states.into_iter() {
             let next_state_id = if translate.contains_key(&next) {
                 translate[&next]
             }

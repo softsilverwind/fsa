@@ -22,7 +22,7 @@ fn dfs(
 
     let mut paths = Vec::new();
 
-    for (&symb, &newstate) in dfa.next[usize::from(current)].iter() {
+    for (symb, &newstate) in dfa.next[current].iter() {
         let paths_rec = if !visited.contains(&newstate) {
             dfs(dfa, end, visited, newstate)
         }

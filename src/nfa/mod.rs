@@ -1,16 +1,16 @@
 use std::{
     str::FromStr,
-    error::Error,
-    collections::HashMap
+    error::Error
 };
 
 use crate::{State, Symbol};
 
+use nicole::{typedvec::TypedVec, IdMap};
+
 mod regex_parser;
 
-pub type NextElem = HashMap<Symbol, Vec<State>>;
-pub type NextElems = Vec<NextElem>;
-pub type NextElemsView = [NextElem];
+pub type NextElem = IdMap<Symbol, Vec<State>>;
+pub type NextElems = TypedVec<State, NextElem>;
 
 #[derive(Clone, Debug)]
 pub struct NFA

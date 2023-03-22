@@ -4,7 +4,7 @@ use std::iter::FromIterator;
 
 use crate::{State, Symbol, dfa};
 
-pub fn find_same(dfa: &dfa::NextElemsView, finals: &HashSet<State>) -> Vec<Vec<State>>
+pub fn find_same(dfa: &dfa::NextElems, finals: &HashSet<State>) -> Vec<Vec<State>>
 {
     let statenum = dfa.len().into();
     let mut different: HashSet<(State, State)> = HashSet::new();
@@ -27,8 +27,8 @@ pub fn find_same(dfa: &dfa::NextElemsView, finals: &HashSet<State>) -> Vec<Vec<S
                     continue;
                 }
 
-                let symbols1: HashSet<Symbol> = HashSet::from_iter(dfa[usize::from(i)].keys().cloned());
-                let symbols2: HashSet<Symbol> = HashSet::from_iter(dfa[usize::from(j)].keys().cloned());
+                let symbols1: HashSet<Symbol> = HashSet::from_iter(dfa[i].keys());
+                let symbols2: HashSet<Symbol> = HashSet::from_iter(dfa[j].keys());
 
                 if symbols1.symmetric_difference(&symbols2).next() != None {
                     different.insert((i, j));
@@ -37,9 +37,9 @@ pub fn find_same(dfa: &dfa::NextElemsView, finals: &HashSet<State>) -> Vec<Vec<S
                     continue;
                 }
 
-                for symbol in dfa[usize::from(i)].keys() {
-                    let next1 = dfa[usize::from(i)][&symbol];
-                    let next2 = dfa[usize::from(j)][&symbol];
+                for symbol in dfa[i].keys() {
+                    let next1 = dfa[i][&symbol];
+                    let next2 = dfa[j][&symbol];
 
                     if different.contains(&(next1, next2)) {
                         different.insert((i, j));
@@ -84,12 +84,12 @@ pub fn minimize_dfa(dfa: &mut dfa::NextElems, finals: &mut HashSet<State>)
         curr_state_id += 1;
 
         let mut new_state = dfa::NextElem::new();
-        for (symbol, next) in state {
+        for (symbol, next) in state.iter() {
             let untranslated_actual_next = match same[usize::from(*next)].get(0) {
                 Some(x) => min(x, next),
                 None => next
             };
-            new_state.insert(*symbol, *untranslated_actual_next);
+            new_state.insert(symbol, *untranslated_actual_next);
         }
         new_dfa.push(new_state);
     }
