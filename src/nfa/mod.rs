@@ -16,7 +16,7 @@ pub type NextElems = TypedVec<State, NextElem>;
 #[derive(Clone, Debug)]
 pub struct NFA
 {
-    pub next: NextElems
+    pub next: NextElems,
 }
 
 impl FromStr for NFA
@@ -25,12 +25,19 @@ impl FromStr for NFA
 
     fn from_str(s: &str) -> Result<Self, Self::Err>
     {
-        Ok(Self { next: regex_parser::parse(s)?  })
+        let next = regex_parser::parse(s)?;
+
+        Ok(Self { next })
     }
 }
 
 impl NFA
 {
+    pub fn final_state(&self) -> State
+    {
+        (self.next.len() - 1).into()
+    }
+
     pub fn print_graphviz(&self)
     {
         indoc::printdoc!("

@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use nicole::IdLike;
 
-use crate::{State, nfa, dfa, Symbol};
+use crate::{State, nfa, dfa, Symbol, NFA, DFA};
 
 pub fn e_closure(nfa: &nfa::NextElems) -> Vec<Vec<State>>
 {
@@ -32,13 +32,13 @@ pub fn e_closure(nfa: &nfa::NextElems) -> Vec<Vec<State>>
     ret
 }
 
-pub fn nfa_to_dfa(nfa: &nfa::NextElems) -> (dfa::NextElems, HashSet<State>)
+pub fn nfa_to_dfa(nfa: &NFA) -> DFA
 {
     let mut queue: VecDeque<Vec<State>> = VecDeque::new();
     let mut translate: HashMap<Vec<State>, State> = HashMap::new();
     let mut ret = dfa::NextElems::new();
     let mut finals: HashSet<State> = HashSet::new();
-    let ecl = e_closure(&nfa);
+    let ecl = e_closure(&nfa.next);
     let initial: Vec<State> = ecl[0].clone();
 
     queue.push_back(initial.clone());
@@ -48,15 +48,15 @@ pub fn nfa_to_dfa(nfa: &nfa::NextElems) -> (dfa::NextElems, HashSet<State>)
     while let Some(vec) = queue.pop_front() {
         let mut ret2 = dfa::NextElem::new();
 
-        for x in vec.iter() {
-            if usize::from(*x) == nfa.len() - 1 {
+        for &x in vec.iter() {
+            if x == nfa.final_state() {
                 finals.insert(translate[&vec]);
             }
         }
 
         let mut next_states = nfa::NextElem::new();
-        for elem in vec {
-            for (symbol, next) in nfa[elem].iter() {
+        for state in vec {
+            for (symbol, next) in nfa.next[state].iter() {
                 if symbol.is_null() {
                     continue
                 }
@@ -89,5 +89,5 @@ pub fn nfa_to_dfa(nfa: &nfa::NextElems) -> (dfa::NextElems, HashSet<State>)
         ret.push(ret2);
     }
 
-    (ret, finals)
+    DFA { next: ret, finals }
 }

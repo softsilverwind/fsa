@@ -33,6 +33,6 @@ SimpleRegex: Box<Ast> = {
         Box::new(Ast::Terminal(RE.captures(<>).unwrap().get(1).unwrap().as_str().parse::<usize>().unwrap().into()))
     },
     r"[a-z]" => {
-        Box::new(Ast::Terminal(((<>.as_bytes()[0] - 97 + 1) as usize).into()))
+        Box::new(Ast::Terminal(((<>.as_bytes()[0] - 97) as usize).into()))
     }
 };

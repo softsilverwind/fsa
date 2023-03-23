@@ -7,6 +7,7 @@ use nicole::typedvec::TypedVec;
 mod convert;
 mod generate;
 mod minimize;
+mod reverse;
 
 pub type NextElem = HashMap<Symbol, State>;
 pub type NextElems = TypedVec<State, NextElem>;
@@ -22,8 +23,7 @@ impl From<&NFA> for DFA
 {
     fn from(nfa: &NFA) -> Self
     {
-        let (next, finals) = convert::nfa_to_dfa(&nfa.next);
-        Self { next, finals }
+        convert::nfa_to_dfa(&nfa)
     }
 }
 
@@ -79,5 +79,10 @@ impl DFA
         }
 
         self.finals.contains(&state)
+    }
+
+    pub fn reverse(&self) -> NFA
+    {
+        reverse::reverse(self)
     }
 }
