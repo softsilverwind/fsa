@@ -32,7 +32,7 @@ pub fn e_closure(nfa: &nfa::NextElems) -> Vec<Vec<State>>
     ret
 }
 
-pub fn nfa_to_dfa(nfa: &NFA) -> DFA
+pub fn nfa_to_dfa(nfa: NFA) -> DFA
 {
     let mut queue: VecDeque<Vec<State>> = VecDeque::new();
     let mut translate: HashMap<Vec<State>, State> = HashMap::new();

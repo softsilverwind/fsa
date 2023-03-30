@@ -19,19 +19,20 @@ pub struct DFA
     pub finals: HashSet<State>
 }
 
-impl From<&NFA> for DFA
+impl From<NFA> for DFA
 {
-    fn from(nfa: &NFA) -> Self
+    fn from(nfa: NFA) -> Self
     {
-        convert::nfa_to_dfa(&nfa)
+        convert::nfa_to_dfa(nfa)
     }
 }
 
 impl DFA
 {
-    pub fn minimize(&mut self)
+    pub fn minimize(mut self) -> Self
     {
         minimize::minimize_dfa(&mut self.next, &mut self.finals);
+        self
     }
 
     pub fn print_graphviz(&self)
