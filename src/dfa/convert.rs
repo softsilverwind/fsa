@@ -9,7 +9,7 @@ pub fn e_closure(nfa: &nfa::NextElems) -> Vec<Vec<State>>
     let mut ret: Vec<Vec<State>> = vec![Vec::new(); nfa.len()];
     let mut stack: Vec<State> = Vec::new();
 
-    for initial in 0..nfa.len() - 1 {
+    for initial in 0..nfa.len() {
         let mut visited: Vec<bool> = vec![false; nfa.len()];
         stack.push(initial.into());
 
