@@ -1,45 +1,47 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 
-use nicole::IdLike;
+use nicole::{typedvec::TypedVec, IdLike};
 
-use crate::{State, nfa, dfa, Symbol, NFA, DFA};
+use crate::{dfa, nfa, State, Symbol, DFA, NFA};
 
-pub fn e_closure(nfa: &nfa::NextElems) -> Vec<Vec<State>>
-{
-    let mut ret: Vec<Vec<State>> = vec![Vec::new(); nfa.len()];
+pub fn e_closure(nfa: &nfa::NextElems) -> TypedVec<State, BTreeSet<State>> {
+    let mut ret: TypedVec<State, BTreeSet<State>> = TypedVec::new();
+    *ret = vec![BTreeSet::new(); nfa.len()];
     let mut stack: Vec<State> = Vec::new();
 
     for initial in 0..nfa.len() {
-        let mut visited: Vec<bool> = vec![false; nfa.len()];
-        stack.push(initial.into());
+        let initial_state = State::from(initial);
+        let mut visited: TypedVec<State, bool> = TypedVec::new();
+        *visited = vec![false; nfa.len()];
+
+        stack.push(initial_state);
 
         while let Some(x) = stack.pop() {
-            if !visited[usize::from(x)] {
-                ret[initial].push(x.into());
+            if !visited[x] {
+                ret[initial_state].insert(x.into());
                 if let Some(neighbors) = nfa[x].get(&Symbol::null()) {
                     stack.extend(neighbors);
                 }
             }
-            visited[usize::from(x)] = true;
+            visited[x] = true;
         }
-    }
-
-    for x in ret.iter_mut() {
-        x.sort();
-        x.dedup();
     }
 
     ret
 }
 
-pub fn nfa_to_dfa(nfa: NFA) -> DFA
-{
-    let mut queue: VecDeque<Vec<State>> = VecDeque::new();
-    let mut translate: HashMap<Vec<State>, State> = HashMap::new();
+pub fn nfa_to_dfa(nfa: NFA) -> DFA {
+    let mut queue: VecDeque<BTreeSet<State>> = VecDeque::new();
+    let mut translate: HashMap<BTreeSet<State>, State> = HashMap::new();
     let mut ret = dfa::NextElems::new();
     let mut finals: HashSet<State> = HashSet::new();
     let ecl = e_closure(&nfa.next);
-    let initial: Vec<State> = ecl[0].clone();
+    let initial: BTreeSet<State> = nfa
+        .initials
+        .iter()
+        .copied()
+        .flat_map(|x| ecl[x].clone())
+        .collect();
 
     queue.push_back(initial.clone());
     translate.insert(initial, 0.into());
@@ -48,40 +50,29 @@ pub fn nfa_to_dfa(nfa: NFA) -> DFA
     while let Some(vec) = queue.pop_front() {
         let mut ret2 = dfa::NextElem::new();
 
-        for &x in vec.iter() {
-            if x == nfa.final_state() {
-                finals.insert(translate[&vec]);
-            }
+        if vec.iter().any(|x| nfa.finals.contains(&x)) {
+            finals.insert(translate[&vec]);
         }
 
         let mut next_states = nfa::NextElem::new();
         for state in vec {
             for (symbol, next) in nfa.next[state].iter() {
                 if symbol.is_null() {
-                    continue
+                    continue;
                 }
 
-                let entry = next_states.entry(*symbol).or_insert(Vec::new());
-                entry.extend(next);
-                for n in next {
-                    entry.extend(ecl[usize::from(*n)].iter());
-                }
-
-                entry.sort();
-                entry.dedup();
+                let entry = next_states.entry(*symbol).or_default();
+                entry.extend(next.iter().copied().flat_map(|n| ecl[n].iter()));
             }
         }
 
         for (symbol, next) in next_states.into_iter() {
-            let next_state_id = if translate.contains_key(&next) {
-                translate[&next]
-            }
-            else {
+            let next_state_id = translate.get(&next).copied().unwrap_or_else(|| {
                 queue.push_back(next.clone());
                 translate.insert(next.clone(), max_state.into());
                 max_state += 1;
                 (max_state - 1).into()
-            };
+            });
 
             ret2.insert(symbol, next_state_id);
         }
@@ -89,5 +80,9 @@ pub fn nfa_to_dfa(nfa: NFA) -> DFA
         ret.push(ret2);
     }
 
-    DFA { next: ret, finals }
+    DFA {
+        next: ret,
+        initial: State(0),
+        finals,
+    }
 }

@@ -6,12 +6,17 @@ build = "build_lalrpop.rs"
 edition = "2021"
 
 [dependencies]
-lalrpop-util = { version = "0.19.8", features = ["lexer"] }
-regex = "1.7.2"
+lalrpop-util = { version = "0.19.9", features = ["lexer"] }
+regex = "1.7.3"
 lazy_static = "1.4.0"
 nicole = { git = "ssh://git@github.com/softsilverwind/nicole.git", tag = "v0.4.0" }
 nicole_derive = { git = "ssh://git@github.com/softsilverwind/nicole_derive.git" }
 indoc = "2.0.1"
 
 [build-dependencies]
-lalrpop = "0.19.8"
+lalrpop = "0.19.9"
+
+[dev-dependencies]
+proptest = "1.1.0"
+rand = "0.8.5"
+regex_generate = "0.2.3"

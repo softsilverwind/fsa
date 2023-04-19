@@ -1,11 +1,10 @@
 use std::cmp::min;
-use std::collections::{HashSet, HashMap};
+use std::collections::{HashMap, HashSet};
 use std::iter::FromIterator;
 
-use crate::{State, Symbol, dfa};
+use crate::{dfa, State, Symbol};
 
-pub fn find_same(dfa: &dfa::NextElems, finals: &HashSet<State>) -> Vec<Vec<State>>
-{
+pub fn find_same(dfa: &dfa::NextElems, finals: &HashSet<State>) -> Vec<Vec<State>> {
     let statenum = dfa.len().into();
     let mut different: HashSet<(State, State)> = HashSet::new();
 
@@ -66,8 +65,7 @@ pub fn find_same(dfa: &dfa::NextElems, finals: &HashSet<State>) -> Vec<Vec<State
     ret
 }
 
-pub fn minimize_dfa(dfa: &mut dfa::NextElems, finals: &mut HashSet<State>)
-{
+pub fn minimize_dfa(dfa: &mut dfa::NextElems, finals: &mut HashSet<State>) {
     let same = find_same(dfa, finals);
 
     let mut new_dfa = dfa::NextElems::new();
@@ -75,7 +73,11 @@ pub fn minimize_dfa(dfa: &mut dfa::NextElems, finals: &mut HashSet<State>)
     let mut curr_state_id = 0;
 
     for (state_id, state) in dfa.iter() {
-        if *same[usize::from(state_id)].get(0).unwrap_or_else(|| &state_id) < state_id {
+        if *same[usize::from(state_id)]
+            .get(0)
+            .unwrap_or_else(|| &state_id)
+            < state_id
+        {
             continue;
         }
 
@@ -86,7 +88,7 @@ pub fn minimize_dfa(dfa: &mut dfa::NextElems, finals: &mut HashSet<State>)
         for (symbol, next) in state.iter() {
             let untranslated_actual_next = match same[usize::from(*next)].get(0) {
                 Some(x) => min(x, next),
-                None => next
+                None => next,
             };
             new_state.insert(*symbol, *untranslated_actual_next);
         }
